@@ -17,8 +17,15 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-io.on('connection', (e) => {
-    console.log("New WebSocket Connection!", e);
+let welcomeMsg = "Welcome to chat app!!";
+io.on('connection', (socket) => {
+    console.log("New WebSocket Connection!");
+    socket.emit("newMessage", welcomeMsg);
+
+    socket.on("sendMessage", (message) => {
+        console.log("New message received!", message);
+        io.emit("newMessage", message);
+    })
 })
 
 server.listen(port, () => {
