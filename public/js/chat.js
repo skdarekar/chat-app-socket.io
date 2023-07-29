@@ -1,16 +1,35 @@
 const socket = io()
 
-socket.on("newMessage", (message) => {
-    console.log(message);
-})
-
 const chatForm = document.getElementById("chat-form");
 const messageInput = chatForm.querySelector("input");
 const sendButton = chatForm.querySelector("button");
+const messages = document.getElementById("messages");
+
 chatForm.addEventListener("submit", onSubmit);
 
 const sendLocationButton = document.getElementById("send-location");
 sendLocationButton.addEventListener("click", onSendLocationClick);
+
+//Templates
+const messageTemplate = document.getElementById("message-template").innerHTML;
+const locationTemplate = document.getElementById("location-template").innerHTML;
+
+
+socket.on("newMessage", (message) => {
+    console.log(message);
+    const html = Mustache.render(messageTemplate, { 
+        message: message.text,
+        createdAt: moment(message.createdAt).format("h:mm:ss a") 
+    });
+    messages.insertAdjacentHTML("beforeend", html); 
+})
+
+socket.on("locationMessage", (url) => {
+    console.log("Location Received:", url);
+    const html = Mustache.render(locationTemplate, { locationURL: url });
+    messages.insertAdjacentHTML("beforeend", html);
+})
+
 
 function onSubmit(event) {
     event.preventDefault();
