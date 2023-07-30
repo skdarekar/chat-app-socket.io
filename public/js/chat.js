@@ -16,33 +16,38 @@ const locationTemplate = document.getElementById("location-template").innerHTML;
 
 //Options
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
-console.log("username, room :", username, room );
+console.log("username, room :", username, room);
 
 socket.on("newMessage", (message) => {
     console.log(message);
-    const html = Mustache.render(messageTemplate, { 
+    const html = Mustache.render(messageTemplate, {
         message: message.text,
-        createdAt: moment(message.createdAt).format("h:mm:ss a") 
+        createdAt: moment(message.createdAt).format("h:mm:ss a")
     });
-    messages.insertAdjacentHTML("beforeend", html); 
+    messages.insertAdjacentHTML("beforeend", html);
 })
 
 socket.on("locationMessage", (locationMsg) => {
     console.log("Location Received:", locationMsg);
-    const html = Mustache.render(locationTemplate, { 
-        locationURL: locationMsg.url, 
+    const html = Mustache.render(locationTemplate, {
+        locationURL: locationMsg.url,
         createdAt: moment(locationMsg.createdAt).format("h:mm:ss a")
     });
     messages.insertAdjacentHTML("beforeend", html);
 })
 
-socket.emit("join", { username, room });
+socket.emit("join", { username, room }, (error) => {
+    if(error){
+        alert(error);
+        location.href = "/";
+    }
+});
 
 function onSubmit(event) {
     event.preventDefault();
     sendButton.setAttribute("disabled", "disabled");
     socket.emit("sendMessage", this.message.value, (error) => {
-        if(error){
+        if (error) {
             return console.log(error);
         }
         sendButton.removeAttribute("disabled");
@@ -51,7 +56,7 @@ function onSubmit(event) {
         // chatForm.reset();
         console.log("The message was delivered!");
     });
-    
+
 }
 
 function onSendLocationClick(event) {
