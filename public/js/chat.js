@@ -13,7 +13,7 @@ sendLocationButton.addEventListener("click", onSendLocationClick);
 //Templates
 const messageTemplate = document.getElementById("message-template").innerHTML;
 const locationTemplate = document.getElementById("location-template").innerHTML;
-
+const sidebarTemplate = document.querySelector("#sidebar-template").innerHTML;
 //Options
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
 console.log("username, room :", username, room);
@@ -38,8 +38,16 @@ socket.on("locationMessage", (locationMsg) => {
     messages.insertAdjacentHTML("beforeend", html);
 })
 
+socket.on("roomData", ({ room, users }) => {
+    const html = Mustache.render(sidebarTemplate, {
+        room,
+        users
+    })
+    document.getElementById("sidebar").innerHTML = html;
+})
+
 socket.emit("join", { username, room }, (error) => {
-    if(error){
+    if (error) {
         alert(error);
         location.href = "/";
     }

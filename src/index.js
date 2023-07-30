@@ -35,6 +35,10 @@ io.on('connection', (socket) => {
         socket.join(user.room);
         socket.emit("newMessage", generateMessage("Admin", welcomeMsg));
         socket.broadcast.to(user.room).emit('newMessage', generateMessage("Admin", `${user.username} has joined!`));
+        io.to(user.room).emit("roomData", {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
         callback();
     })
 
@@ -52,7 +56,7 @@ io.on('connection', (socket) => {
 
     socket.on("sendLocation", (location, callback) => {
         const user = getUser(socket.id)
-        if(user){
+        if (user) {
             socket.broadcast.to(user.room).emit("locationMessage", generateLocationMessage(user.username, `https://google.com/maps?q=${location.longitude},${location.latitude}`))
             callback();
         }
@@ -63,6 +67,10 @@ io.on('connection', (socket) => {
 
         if (user) {
             io.to(user.room).emit("newMessage", generateMessage("Admin", `${user.username} has left!`));
+            io.to(user.room).emit("roomData", {
+                room: user.room,
+                users: getUsersInRoom(user.room)
+            })
         }
     })
 })
