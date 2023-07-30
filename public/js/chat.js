@@ -14,6 +14,9 @@ sendLocationButton.addEventListener("click", onSendLocationClick);
 const messageTemplate = document.getElementById("message-template").innerHTML;
 const locationTemplate = document.getElementById("location-template").innerHTML;
 
+//Options
+const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
+console.log("username, room :", username, room );
 
 socket.on("newMessage", (message) => {
     console.log(message);
@@ -33,6 +36,7 @@ socket.on("locationMessage", (locationMsg) => {
     messages.insertAdjacentHTML("beforeend", html);
 })
 
+socket.emit("join", { username, room });
 
 function onSubmit(event) {
     event.preventDefault();

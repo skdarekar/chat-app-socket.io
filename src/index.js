@@ -22,8 +22,15 @@ app.get('/', (req, res) => {
 let welcomeMsg = "Welcome to chat app!!";
 io.on('connection', (socket) => {
     console.log("New WebSocket Connection!");
-    socket.emit("newMessage", generateMessage(welcomeMsg));
-    socket.broadcast.emit('newMessage', generateMessage("A new user has joined!"));
+    
+    // socket.emit, io.emit, socket.broadcast.emit
+    // socket.to.emit, socket.broadcast.to.emit
+
+    socket.on("join", ({ username, room }) => {
+        socket.join(room);
+        socket.emit("newMessage", generateMessage(welcomeMsg));
+        socket.broadcast.to(room).emit('newMessage', generateMessage(`${username} has joined!`));    
+    })
 
     socket.on("sendMessage", (message, callback) => {
         const filter = new Filter();
