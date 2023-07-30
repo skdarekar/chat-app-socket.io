@@ -18,6 +18,33 @@ const sidebarTemplate = document.querySelector("#sidebar-template").innerHTML;
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
 console.log("username, room :", username, room);
 
+// Function autoScroll to bottom
+// also check if user is at bottom of the chat
+// if user manually scrolled up then do not autoscroll
+const autoScroll = () => {
+    // New message element
+    const $newMessage = messages.lastElementChild;
+
+    // Height of new message
+    const newMessageStyles = getComputedStyle($newMessage);
+    const newMessageMargin = parseInt(newMessageStyles.marginBottom);
+    const newMessageHeight = $newMessage.offsetHeight + newMessageMargin;
+
+    // Visible height
+    const visibleHeight = messages.offsetHeight;
+
+    // Height of message container
+    const containerHeight = messages.scrollHeight;
+
+    // How far have I scrolled?
+    const scrollOffset = messages.scrollTop + visibleHeight;
+
+    if(containerHeight - newMessageHeight <= scrollOffset){
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+}
+
 socket.on("newMessage", (message) => {
     console.log(message);
     const html = Mustache.render(messageTemplate, {
@@ -26,6 +53,7 @@ socket.on("newMessage", (message) => {
         createdAt: moment(message.createdAt).format("h:mm:ss a")
     });
     messages.insertAdjacentHTML("beforeend", html);
+    autoScroll();
 })
 
 socket.on("locationMessage", (locationMsg) => {
@@ -36,6 +64,7 @@ socket.on("locationMessage", (locationMsg) => {
         createdAt: moment(locationMsg.createdAt).format("h:mm:ss a")
     });
     messages.insertAdjacentHTML("beforeend", html);
+    autoScroll();
 })
 
 socket.on("roomData", ({ room, users }) => {
